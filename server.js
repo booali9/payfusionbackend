@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -33,3 +34,19 @@ connectDB()
     console.error('Database connection failed:', err.message);
     process.exit(1);
   });
+=======
+// server.js
+const express = require('express');
+const app = express();
+const port = 3000;
+
+// Define a simple route
+app.get('/', (req, res) => {
+  res.send('Hello, World!');
+});
+
+// Start the server
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
+>>>>>>> 973cb58e44d5936152e00f6c0e2f2a5c0299e80e

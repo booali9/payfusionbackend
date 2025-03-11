@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
     "name": "payfusion-api",
     "version": "1.0.0",
     "description": "PayFusion API - Backend for PayFusion mobile app",
@@ -23,3 +24,23 @@
       "nodemon": "^2.0.22"
     }
   }
+=======
+  "name": "payfusion-backend",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.14.2",
+    "mongoose": "^8.12.1"
+  }
+}
+>>>>>>> 973cb58e44d5936152e00f6c0e2f2a5c0299e80e
