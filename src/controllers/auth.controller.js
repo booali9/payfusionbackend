@@ -3,6 +3,7 @@ const Device = require('../models/Device');
 const OTP = require('../models/OTP');
 const otpService = require('../services/otp.service');
 const emailService = require('../services/email.service');
+const smsService = require('./sms.service');
 
 exports.register = async (req, res, next) => {
   try {
@@ -30,13 +31,12 @@ exports.register = async (req, res, next) => {
       deviceType
     });
 
-    const otp = await otpService.generateOTP(user._id, email, phoneNumber, 'VERIFICATION');
+    // OTP service now handles both email and SMS delivery
+    const otpResponse = await otpService.generateOTP(user._id, email, phoneNumber, 'VERIFICATION');
     
-    await emailService.sendVerificationEmail(email, otp.otp, fullName);
-
     res.status(201).json({
       success: true,
-      message: 'Registration successful. OTP sent to your email.'
+      message: 'Registration successful. OTP sent to your email and phone.'
     });
   } catch (error) {
     next(error);
@@ -162,13 +162,12 @@ exports.requestPasswordReset = async (req, res, next) => {
       });
     }
 
-    const otp = await otpService.generateOTP(user._id, user.email, user.phoneNumber, 'PASSWORD_RESET');
+    // OTP service now handles both email and SMS delivery
+    const otpResponse = await otpService.generateOTP(user._id, user.email, user.phoneNumber, 'PASSWORD_RESET');
     
-    await emailService.sendPasswordResetEmail(user.email, otp.otp, user.fullName);
-
     res.status(200).json({
       success: true,
-      message: 'Password reset OTP sent to your email'
+      message: 'Password reset OTP sent to your email and phone'
     });
   } catch (error) {
     next(error);
@@ -215,9 +214,19 @@ exports.changeDevice = async (req, res, next) => {
     const { deviceId, deviceName, deviceType } = req.body;
     const userId = req.user.id;
 
-    const otp = await otpService.generateOTP(userId, req.user.email, req.user.phoneNumber, 'DEVICE_CHANGE');
+    // OTP service now handles both email and SMS delivery
+    const otpResponse = await otpService.generateOTP(userId, req.user.email, req.user.phoneNumber, 'DEVICE_CHANGE');
     
-    await emailService.sendDeviceChangeEmail(req.user.email, otp.otp, req.user.fullName);
+    // Device info for alert
+    const deviceInfo = {
+      name: deviceName,
+      type: deviceType,
+      id: deviceId
+    };
+    
+    // Send device change alerts
+    await emailService.sendDeviceChangeAlert(req.user.email, deviceInfo);
+    await smsService.sendDeviceChangeAlert(req.user.phoneNumber, deviceInfo);
 
     await Device.create({
       userId,
@@ -229,7 +238,7 @@ exports.changeDevice = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: 'Device change initiated. Please verify with OTP sent to your email.'
+      message: 'Device change initiated. Please verify with OTP sent to your email and phone.'
     });
   } catch (error) {
     next(error);
