@@ -20,7 +20,7 @@ const OTPSchema = new mongoose.Schema({
   },
   purpose: {
     type: String,
-    enum: ['VERIFICATION', 'PASSWORD_RESET', 'DEVICE_CHANGE'],
+    enum: ['VERIFICATION', 'PASSWORD_RESET', 'DEVICE_CHANGE', 'PHONE_LOGIN'],
     required: true
   },
   isUsed: {

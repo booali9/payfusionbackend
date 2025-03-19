@@ -1,97 +1,98 @@
+// Add these new methods to the existing auth.controller.js
+
 const User = require('../models/User');
-const Device = require('../models/Device');
 const OTP = require('../models/OTP');
+const Device = require('../models/Device');
 const otpService = require('../services/otp.service');
 const emailService = require('../services/email.service');
-const smsService = require('./sms.service');
+const smsService = require('../services/sms.service');
 
-exports.register = async (req, res, next) => {
+// Keep existing methods, and add or update these:
+
+exports.requestPhoneLogin = async (req, res, next) => {
   try {
-    const { fullName, email, phoneNumber, password, deviceId, deviceName, deviceType } = req.body;
+    const { phoneNumber, deviceId, deviceName, deviceType } = req.body;
 
-    const existingUser = await User.findOne({ $or: [{ email }, { phoneNumber }] });
-    if (existingUser) {
-      return res.status(409).json({
+    // Check if user exists
+    const user = await User.findOne({ phoneNumber });
+    if (!user) {
+      return res.status(404).json({
         success: false,
-        message: 'User with this email or phone number already exists'
+        message: 'User not found with this phone number'
       });
     }
 
-    const user = await User.create({
-      fullName,
-      email,
-      phoneNumber,
-      password
-    });
+    // Generate OTP for phone login
+    await otpService.generateOTP(user._id, user.email, phoneNumber, 'PHONE_LOGIN');
 
-    await Device.create({
-      userId: user._id,
-      deviceId,
-      deviceName,
-      deviceType
-    });
-
-    // OTP service now handles both email and SMS delivery
-    const otpResponse = await otpService.generateOTP(user._id, email, phoneNumber, 'VERIFICATION');
-    
-    res.status(201).json({
+    res.status(200).json({
       success: true,
-      message: 'Registration successful. OTP sent to your email and phone.'
+      message: 'OTP sent to your phone number',
+      userId: user._id
     });
   } catch (error) {
     next(error);
   }
 };
 
-exports.login = async (req, res, next) => {
+exports.verifyPhoneLogin = async (req, res, next) => {
   try {
-    const { emailOrPhone, password, deviceId, deviceName, deviceType } = req.body;
+    const { phoneNumber, otp, deviceId, deviceName, deviceType } = req.body;
 
-    const user = await User.findOne({
-      $or: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }]
-    }).select('+password');
-
+    // Find user by phone number
+    const user = await User.findOne({ phoneNumber });
     if (!user) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'User not found'
       });
     }
 
-    const isMatch = await user.matchPassword(password);
-    if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials'
-      });
-    }
-
-    if (!user.isVerified) {
-      return res.status(401).json({
-        success: false,
-        message: 'Please verify your account first'
-      });
-    }
-
-    const device = await Device.findOne({
+    // Verify OTP
+    const otpRecord = await OTP.findOne({ 
       userId: user._id,
-      deviceId: deviceId
+      otp,
+      purpose: 'PHONE_LOGIN',
+      isUsed: false,
+      expiresAt: { $gt: Date.now() }
     });
 
-    if (!device) {
-      return res.status(403).json({
+    if (!otpRecord) {
+      return res.status(400).json({
         success: false,
-        message: 'Device not recognized. Please change device first.',
-        requiresDeviceChange: true
+        message: 'Invalid or expired OTP'
       });
     }
 
+    // Mark OTP as used
+    otpRecord.isUsed = true;
+    await otpRecord.save();
+
+    // Check device
+    let device = await Device.findOne({
+      userId: user._id,
+      deviceId
+    });
+
+    // If device doesn't exist, create it
+    if (!device) {
+      device = await Device.create({
+        userId: user._id,
+        deviceId,
+        deviceName,
+        deviceType,
+        isActive: true
+      });
+    }
+
+    // Update login timestamps
     device.lastLogin = Date.now();
     await device.save();
-
+    
     user.lastLogin = Date.now();
     await user.save();
 
+    // Generate token
     const token = user.getSignedJwtToken();
 
     res.status(200).json({
@@ -112,41 +113,7 @@ exports.login = async (req, res, next) => {
   }
 };
 
-exports.verifyOTP = async (req, res, next) => {
-  try {
-    const { email, otp, purpose } = req.body;
-
-    const otpRecord = await OTP.findOne({
-      email,
-      otp,
-      purpose,
-      isUsed: false,
-      expiresAt: { $gt: Date.now() }
-    });
-
-    if (!otpRecord) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid or expired OTP'
-      });
-    }
-
-    otpRecord.isUsed = true;
-    await otpRecord.save();
-
-    if (purpose === 'VERIFICATION') {
-      await User.findByIdAndUpdate(otpRecord.userId, { isVerified: true });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'OTP verified successfully'
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
+// Update requestPasswordReset method
 exports.requestPasswordReset = async (req, res, next) => {
   try {
     const { emailOrPhone } = req.body;
@@ -163,23 +130,38 @@ exports.requestPasswordReset = async (req, res, next) => {
     }
 
     // OTP service now handles both email and SMS delivery
-    const otpResponse = await otpService.generateOTP(user._id, user.email, user.phoneNumber, 'PASSWORD_RESET');
+    await otpService.generateOTP(user._id, user.email, user.phoneNumber, 'PASSWORD_RESET');
     
     res.status(200).json({
       success: true,
-      message: 'Password reset OTP sent to your email and phone'
+      message: 'Password reset OTP sent to your email and phone',
+      userId: user._id
     });
   } catch (error) {
     next(error);
   }
 };
 
+// Update resetPassword method
 exports.resetPassword = async (req, res, next) => {
   try {
-    const { email, otp, newPassword } = req.body;
+    const { emailOrPhone, otp, newPassword } = req.body;
+    
+    // Find user by email or phone
+    const user = await User.findOne({
+      $or: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }]
+    });
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
 
+    // Find and validate OTP
     const otpRecord = await OTP.findOne({
-      email,
+      userId: user._id,
       otp,
       purpose: 'PASSWORD_RESET',
       isUsed: false,
@@ -193,10 +175,11 @@ exports.resetPassword = async (req, res, next) => {
       });
     }
 
+    // Mark OTP as used
     otpRecord.isUsed = true;
     await otpRecord.save();
 
-    const user = await User.findById(otpRecord.userId);
+    // Update password
     user.password = newPassword;
     await user.save();
 
@@ -209,13 +192,27 @@ exports.resetPassword = async (req, res, next) => {
   }
 };
 
+// Update changeDevice method
 exports.changeDevice = async (req, res, next) => {
   try {
     const { deviceId, deviceName, deviceType } = req.body;
     const userId = req.user.id;
+    
+    // Check if this device is already registered
+    const existingDevice = await Device.findOne({
+      userId,
+      deviceId
+    });
+    
+    if (existingDevice) {
+      return res.status(409).json({
+        success: false,
+        message: 'This device is already registered to your account'
+      });
+    }
 
-    // OTP service now handles both email and SMS delivery
-    const otpResponse = await otpService.generateOTP(userId, req.user.email, req.user.phoneNumber, 'DEVICE_CHANGE');
+    // Generate OTP for device change
+    await otpService.generateOTP(userId, req.user.email, req.user.phoneNumber, 'DEVICE_CHANGE');
     
     // Device info for alert
     const deviceInfo = {
@@ -228,17 +225,49 @@ exports.changeDevice = async (req, res, next) => {
     await emailService.sendDeviceChangeAlert(req.user.email, deviceInfo);
     await smsService.sendDeviceChangeAlert(req.user.phoneNumber, deviceInfo);
 
+    // Create pending device record
     await Device.create({
       userId,
       deviceId,
       deviceName,
       deviceType,
-      isActive: false
+      isActive: false // Will be activated after OTP verification
     });
 
     res.status(200).json({
       success: true,
       message: 'Device change initiated. Please verify with OTP sent to your email and phone.'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Add verifyDeviceChange method
+exports.verifyDeviceChange = async (req, res, next) => {
+  try {
+    const { otp, deviceId } = req.body;
+    const userId = req.user.id;
+
+    // Verify OTP
+    const otpVerified = await otpService.verifyOTP(userId, otp, 'DEVICE_CHANGE');
+    
+    if (!otpVerified) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired OTP'
+      });
+    }
+    
+    // Activate the new device
+    await Device.findOneAndUpdate(
+      { userId, deviceId, isActive: false },
+      { isActive: true }
+    );
+    
+    res.status(200).json({
+      success: true,
+      message: 'Device verified and activated successfully'
     });
   } catch (error) {
     next(error);

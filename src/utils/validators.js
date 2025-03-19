@@ -7,6 +7,11 @@ const name = Joi.string().min(2).max(50).required();
 const otp = Joi.string().length(6).pattern(/^[0-9]+$/).required();
 const deviceId = Joi.string().required();
 const deviceName = Joi.string().required();
+const deviceType = Joi.string().required();
+const emailOrPhone = Joi.alternatives().try(
+  Joi.string().email(),
+  Joi.string().pattern(/^[0-9]{10,15}$/)
+).required();
 
 const validators = {
   register: Joi.object({
@@ -31,22 +36,45 @@ const validators = {
     otp
   }),
   
+  // Updated to handle both email and phone
   forgotPassword: Joi.object({
-    email
+    emailOrPhone
   }),
   
+  // Updated to handle both email and phone
   resetPassword: Joi.object({
-    email,
+    emailOrPhone,
     otp,
     newPassword: password,
     confirmPassword: Joi.ref('newPassword')
   }),
   
   changeDevice: Joi.object({
-    email,
     deviceId,
     deviceName,
-    otp
+    deviceType
+  }),
+  
+  // New validator for verifying device change
+  verifyDeviceChange: Joi.object({
+    otp,
+    deviceId
+  }),
+  
+  // New validator for phone login request
+  requestPhoneLogin: Joi.object({
+    phoneNumber: phone,
+    deviceId,
+    deviceName
+  }),
+  
+  // New validator for verifying phone login
+  verifyPhoneLogin: Joi.object({
+    phoneNumber: phone,
+    otp,
+    deviceId,
+    deviceName,
+    deviceType
   }),
   
   updateProfile: Joi.object({
