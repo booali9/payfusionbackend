@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const { connectDB } = require('./src/config/db');
-const errorHandler = require('./src/utils/errorHandler');
+const { errorHandler } = require('./src/utils/errorHandler'); // Fix: destructure the errorHandler function
 
 dotenv.config();
 

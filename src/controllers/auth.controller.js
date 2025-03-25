@@ -49,7 +49,7 @@ exports.verifyPhoneLogin = async (req, res, next) => {
     }
 
     // Verify OTP
-    const otpRecord = await OTP.findOne({ 
+    const otpRecord = await OTP.findOne({
       userId: user._id,
       otp,
       purpose: 'PHONE_LOGIN',
@@ -88,7 +88,7 @@ exports.verifyPhoneLogin = async (req, res, next) => {
     // Update login timestamps
     device.lastLogin = Date.now();
     await device.save();
-    
+
     user.lastLogin = Date.now();
     await user.save();
 
@@ -131,7 +131,7 @@ exports.requestPasswordReset = async (req, res, next) => {
 
     // OTP service now handles both email and SMS delivery
     await otpService.generateOTP(user._id, user.email, user.phoneNumber, 'PASSWORD_RESET');
-    
+
     res.status(200).json({
       success: true,
       message: 'Password reset OTP sent to your email and phone',
@@ -146,12 +146,12 @@ exports.requestPasswordReset = async (req, res, next) => {
 exports.resetPassword = async (req, res, next) => {
   try {
     const { emailOrPhone, otp, newPassword } = req.body;
-    
+
     // Find user by email or phone
     const user = await User.findOne({
       $or: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }]
     });
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -197,13 +197,13 @@ exports.changeDevice = async (req, res, next) => {
   try {
     const { deviceId, deviceName, deviceType } = req.body;
     const userId = req.user.id;
-    
+
     // Check if this device is already registered
     const existingDevice = await Device.findOne({
       userId,
       deviceId
     });
-    
+
     if (existingDevice) {
       return res.status(409).json({
         success: false,
@@ -213,14 +213,14 @@ exports.changeDevice = async (req, res, next) => {
 
     // Generate OTP for device change
     await otpService.generateOTP(userId, req.user.email, req.user.phoneNumber, 'DEVICE_CHANGE');
-    
+
     // Device info for alert
     const deviceInfo = {
       name: deviceName,
       type: deviceType,
       id: deviceId
     };
-    
+
     // Send device change alerts
     await emailService.sendDeviceChangeAlert(req.user.email, deviceInfo);
     await smsService.sendDeviceChangeAlert(req.user.phoneNumber, deviceInfo);
@@ -244,6 +244,8 @@ exports.changeDevice = async (req, res, next) => {
 };
 
 // Add verifyDeviceChange method
+// ... existing code ...
+
 exports.verifyDeviceChange = async (req, res, next) => {
   try {
     const { otp, deviceId } = req.body;
@@ -251,20 +253,20 @@ exports.verifyDeviceChange = async (req, res, next) => {
 
     // Verify OTP
     const otpVerified = await otpService.verifyOTP(userId, otp, 'DEVICE_CHANGE');
-    
+
     if (!otpVerified) {
       return res.status(400).json({
         success: false,
         message: 'Invalid or expired OTP'
       });
     }
-    
+
     // Activate the new device
     await Device.findOneAndUpdate(
       { userId, deviceId, isActive: false },
       { isActive: true }
     );
-    
+
     res.status(200).json({
       success: true,
       message: 'Device verified and activated successfully'
@@ -273,3 +275,51 @@ exports.verifyDeviceChange = async (req, res, next) => {
     next(error);
   }
 };
+
+// Define the verifyOTP function if it's not already defined
+exports.verifyOTP = async (req, res, next) => {
+  try {
+    const { email, otp, purpose } = req.body;
+    
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    // Verify OTP
+    const otpVerified = await otpService.verifyOTP(user._id, otp, purpose);
+    
+    if (!otpVerified) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired OTP'
+      });
+    }
+    
+    // If it's for email verification, mark user as verified
+    if (purpose === 'VERIFICATION') {
+      user.isVerified = true;
+      await user.save();
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'OTP verified successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Make sure to export register and login functions if they're defined earlier
+exports.register = exports.register || (async (req, res, next) => {
+  // Define if not already defined
+});
+
+exports.login = exports.login || (async (req, res, next) => {
+  // Define if not already defined
+});
