@@ -316,10 +316,168 @@ exports.verifyOTP = async (req, res, next) => {
 };
 
 // Make sure to export register and login functions if they're defined earlier
-exports.register = exports.register || (async (req, res, next) => {
-  // Define if not already defined
-});
+exports.register = async (req, res, next) => {
+  try {
+    const { firstName, lastName, email, DOB, gender } = req.body;
 
-exports.login = exports.login || (async (req, res, next) => {
-  // Define if not already defined
-});
+    // Validate required fields
+    if (!firstName || !lastName || !email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide firstName, lastName, and email'
+      });
+    }
+
+    // Check if user already exists with this email
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: 'A user with this email already exists'
+      });
+    }
+
+    // Create the user with minimum required fields
+    const user = await User.create({
+      fullName: `${firstName} ${lastName}`,
+      firstName,
+      lastName,
+      email,
+      DOB: DOB || null,
+      gender: gender || null,
+      isVerified: false,
+      registrationStep: 'INITIAL' // Track registration progress
+    });
+
+    // Generate a temporary token for completing registration
+    const tempToken = user.getSignedJwtToken(true); // You might need to modify your token method
+
+    res.status(201).json({
+      success: true,
+      message: 'Initial registration successful. Please complete your profile.',
+      tempToken,
+      userId: user._id,
+      user: {
+        id: user._id,
+        fullName: `${firstName} ${lastName}`,
+        email: email,
+        registrationStep: 'INITIAL'
+      }
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
+    next(error);
+  }
+};
+
+// Update login to use phone number
+exports.login = async (req, res, next) => {
+  try {
+    const { phoneNumber, password } = req.body;
+
+    // Check if user exists
+    const user = await User.findOne({ phoneNumber }).select('+password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found with this phone number'
+      });
+    }
+
+    // Check if password matches
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid password'
+      });
+    }
+
+    // Check if user is verified
+    if (!user.isVerified) {
+      // Resend verification OTP
+      await otpService.generateOTP(user._id, user.email, user.phoneNumber, 'VERIFICATION');
+      
+      return res.status(401).json({
+        success: false,
+        message: 'Please verify your phone number first. We have sent a new OTP.',
+        userId: user._id
+      });
+    }
+
+    // Update last login
+    user.lastLogin = Date.now();
+    await user.save();
+
+    // Generate token
+    const token = user.getSignedJwtToken();
+
+    res.status(200).json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        phoneNumber: user.phoneNumber,
+        isVerified: user.isVerified,
+        isKYCVerified: user.isKYCVerified,
+        onboardingCompleted: user.onboardingCompleted
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+exports.completeRegistration = async (req, res, next) => {
+  try {
+    const { userId, phoneNumber, password } = req.body;
+    
+    // Validate required fields
+    if (!userId || !phoneNumber || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide userId, phoneNumber, and password'
+      });
+    }
+    
+    // Check if phone number is already in use
+    const phoneExists = await User.findOne({ 
+      phoneNumber, 
+      _id: { $ne: userId } // Exclude current user
+    });
+    
+    if (phoneExists) {
+      return res.status(409).json({
+        success: false,
+        message: 'This phone number is already registered'
+      });
+    }
+    
+    // Find and update the user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    // Update user with phone and password
+    user.phoneNumber = phoneNumber;
+    user.password = password;
+    user.registrationStep = 'COMPLETE';
+    await user.save();
+    
+    // Generate OTP for phone verification
+    await otpService.generateOTP(user._id, user.email, phoneNumber, 'VERIFICATION');
+    
+    res.status(200).json({
+      success: true,
+      message: 'Registration completed. Please verify your phone number with the OTP sent.',
+      userId: user._id
+    });
+  } catch (error) {
+    console.error('Complete registration error:', error);
+    next(error);
+  }
+};
