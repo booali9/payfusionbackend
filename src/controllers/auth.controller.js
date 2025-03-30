@@ -319,50 +319,37 @@ exports.verifyOTP = async (req, res, next) => {
 exports.register = async (req, res, next) => {
   try {
     const { firstName, lastName, email, DOB, gender } = req.body;
-
-    // Validate required fields
-    if (!firstName || !lastName || !email) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide firstName, lastName, and email'
-      });
-    }
-
-    // Check if user already exists with this email
-    const existingUser = await User.findOne({ email });
+    
+    // Check if user exists - use lean() for better performance
+    const existingUser = await User.findOne({ email }).lean();
+    
     if (existingUser) {
       return res.status(409).json({
         success: false,
-        message: 'A user with this email already exists'
+        message: 'Email already in use'
       });
     }
-
-    // Create the user with minimum required fields
+    
+    // Create user with minimal data for faster operation
     const user = await User.create({
       fullName: `${firstName} ${lastName}`,
-      firstName,
-      lastName,
       email,
-      DOB: DOB || null,
-      gender: gender || null,
-      isVerified: false,
-      registrationStep: 'INITIAL' // Track registration progress
+      registrationStep: 'INITIAL'
+      // Other fields will be added later
     });
-
-    // Generate a temporary token for completing registration
-    const tempToken = user.getSignedJwtToken(true); // You might need to modify your token method
+    
+    // Generate token with minimal claims
+    const tempToken = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' } // Shorter expiration for temp token
+    );
 
     res.status(201).json({
       success: true,
-      message: 'Initial registration successful. Please complete your profile.',
-      tempToken,
+      message: 'Registration initiated successfully',
       userId: user._id,
-      user: {
-        id: user._id,
-        fullName: `${firstName} ${lastName}`,
-        email: email,
-        registrationStep: 'INITIAL'
-      }
+      tempToken
     });
   } catch (error) {
     console.error('Registration error:', error);
