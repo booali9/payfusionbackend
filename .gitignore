@@ -11,3 +11,4 @@ uploads/*
 .qodo
 .env.env
 .vercel
+.env
