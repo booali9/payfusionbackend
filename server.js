@@ -13,6 +13,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Add health check endpoint BEFORE routes and error handler
+app.get('/', (req, res) => {
+  res.status(200).json({ 
+    message: 'PayFusion API Server',
+    status: 'online',
+    version: '1.0.0'
+  });
+});
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Server is running' });
 });
