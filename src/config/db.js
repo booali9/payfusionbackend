@@ -15,11 +15,11 @@ exports.connectDB = async () => {
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000, // Lower server selection timeout
-      socketTimeoutMS: 45000, // How long sockets stay open idle
-      maxPoolSize: 10, // Maintain up to 10 connections
-      connectTimeoutMS: 10000, // Give up initial connection after 10 seconds
-      bufferCommands: false, // Disable buffering for faster response
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      maxPoolSize: 10,
+      connectTimeoutMS: 10000,
+      // Remove bufferCommands: false
     });
 
     isConnected = true;
@@ -31,11 +31,11 @@ exports.connectDB = async () => {
     if (!process.env.VERCEL) {
       process.exit(1);
     }
-    throw error; // Re-throw for handling in serverless context
+    throw error;
   }
 };
 
-// Add this to handle connection closing (for non-serverless environments)
+// Keep disconnectDB as is
 exports.disconnectDB = async () => {
   if (isConnected) {
     if (process.env.NODE_ENV === 'test') {
