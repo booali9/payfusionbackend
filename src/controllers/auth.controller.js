@@ -330,30 +330,50 @@ exports.register = async (req, res, next) => {
       });
     }
     
-    // Create user with minimal data for faster operation
+    // Create user with required fields
     const user = await User.create({
       fullName: `${firstName} ${lastName}`,
       email,
-      registrationStep: 'INITIAL'
-      // Other fields will be added later
+      DOB: DOB || undefined,
+      gender: gender || undefined,
+      registrationStep: 'INITIAL',
+      isVerified: false,
+      onboardingCompleted: false
     });
     
-    // Generate token with minimal claims
-    const tempToken = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' } // Shorter expiration for temp token
-    );
-
-    res.status(201).json({
+    // Generate a simpler response without token for now
+    return res.status(201).json({
       success: true,
       message: 'Registration initiated successfully',
-      userId: user._id,
-      tempToken
+      userId: user._id
     });
   } catch (error) {
     console.error('Registration error:', error);
-    next(error);
+    
+    // Better error handling with specific messages
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors: messages
+      });
+    }
+    
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: 'Duplicate field value entered',
+        errors: []
+      });
+    }
+    
+    // Send detailed error in development, generic in production
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'An error occurred during registration',
+      errors: []
+    });
   }
 };
 
