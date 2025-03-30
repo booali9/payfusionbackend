@@ -1,5 +1,5 @@
 // Add these new methods to the existing auth.controller.js
-
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const OTP = require('../models/OTP');
 const Device = require('../models/Device');
