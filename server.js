@@ -6,17 +6,43 @@ const { errorHandler } = require('./src/utils/errorHandler');
 
 dotenv.config();
 
+// Initialize express app
 const app = express();
 
+// Apply middlewares
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Add health check endpoint BEFORE routes and error handler
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok', message: 'Server is running' });
+// Connect to database outside of the request handler for Vercel
+let dbPromise;
+if (process.env.VERCEL) {
+  dbPromise = connectDB();
+}
+
+// Add root path handler
+app.get('/', (req, res) => {
+  res.status(200).json({ 
+    message: 'PayFusion API Server',
+    status: 'online',
+    version: '1.0.0'
+  });
 });
 
+// Health check endpoint
+app.get('/api/health', async (req, res) => {
+  try {
+    // For Vercel, ensure DB is connected with each request
+    if (process.env.VERCEL && dbPromise) {
+      await dbPromise;
+    }
+    res.status(200).json({ status: 'ok', message: 'Server is running' });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
+
+// Routes
 app.use('/api/auth', require('./src/routes/auth.routes'));
 app.use('/api/users', require('./src/routes/user.routes'));
 app.use('/api/kyc', require('./src/routes/kyc.routes'));
@@ -26,9 +52,10 @@ app.use('/uploads', express.static('uploads'));
 
 app.use(errorHandler);
 
+// For local development
 const PORT = process.env.PORT || 5000;
 
-if (require.main === module) {
+if (require.main === module && !process.env.VERCEL) {
   connectDB()
     .then(() => {
       app.listen(PORT, () => {
@@ -41,4 +68,5 @@ if (require.main === module) {
     });
 }
 
+// For Vercel serverless deployment
 module.exports = app;
