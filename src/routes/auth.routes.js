@@ -5,6 +5,7 @@ const {
   verifyOTP, 
   requestPasswordReset, 
   resetPassword, 
+  completeRegistration,
   changeDevice,
   requestPhoneLogin,
   verifyPhoneLogin,
@@ -13,7 +14,7 @@ const {
 const { authenticate } = require('../middleware/auth.middleware');
 
 const router = express.Router();
-
+router.post('/complete-registration', completeRegistration);
 router.post('/verify-otp', verifyOTP);
 router.post('/register', register);
 router.post('/login', login);
