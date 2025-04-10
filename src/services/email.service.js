@@ -4,17 +4,12 @@ class EmailService {
   constructor() {
     // Add error handling to prevent crashes during testing or when env vars missing
     try {
+      // Use Gmail service configuration instead of direct SMTP
       this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || 'localhost',
-        port: process.env.SMTP_PORT || 25,
-        secure: process.env.SMTP_SECURE === 'true',
+        service: process.env.EMAIL_SERVICE || 'gmail',
         auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASSWORD,
-        },
-        // Add this to prevent hanging in tests
-        tls: {
-          rejectUnauthorized: false
+          user: process.env.EMAIL_USERNAME,
+          pass: process.env.EMAIL_PASSWORD
         },
         // Add timeout to prevent hanging
         connectionTimeout: 5000
