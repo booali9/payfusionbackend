@@ -1,50 +1,27 @@
 const express = require('express');
 const { authenticate } = require('../middleware/auth.middleware');
-const { addPaymentMethod, getPaymentMethods, deletePaymentMethod, setDefaultPaymentMethod } = require('../controllers/wallet.controller');
+const walletController = require('../controllers/wallet.controller');
+
 const router = express.Router();
 
 // Use authentication middleware for all wallet routes
 router.use(authenticate);
 
-// Define placeholder routes for wallet functionality
-// Replace with actual controller methods when they're implemented
-router.get('/balance', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Wallet balance retrieved successfully',
-    balance: {
-      available: 0,
-      pending: 0,
-      currency: 'USD'
-    }
-  });
-});
+// Wallet core routes
+router.get('/balance', walletController.getWalletBalance);
+router.post('/deposit', walletController.depositFunds);
+router.post('/withdraw', walletController.withdrawFunds);
+router.get('/transactions', walletController.getTransactions);
 
-router.post('/deposit', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Deposit endpoint placeholder'
-  });
-});
+// Payment method routes
+router.post('/payment-methods', walletController.addPaymentMethod);
+router.get('/payment-methods', walletController.getPaymentMethods);
+router.delete('/payment-methods/:id', walletController.deletePaymentMethod);
+router.patch('/payment-methods/:id/set-default', walletController.setDefaultPaymentMethod);
 
-router.post('/withdraw', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Withdrawal endpoint placeholder'
-  });
-});
-
-router.get('/transactions', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Wallet transactions endpoint placeholder',
-    transactions: []
-  });
-});
-
-router.post('/payment-methods', addPaymentMethod);
-router.get('/payment-methods', getPaymentMethods);
-router.delete('/payment-methods/:id', deletePaymentMethod);
-router.patch('/payment-methods/:id/set-default', setDefaultPaymentMethod);
+// Stripe integration routes
+router.post('/checkout-session', walletController.createCheckoutSession);
+router.post('/payment-method', walletController.createPaymentMethod);
+router.post('/payment-methods/save', walletController.savePaymentMethod);
 
 module.exports = router;

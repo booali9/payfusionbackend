@@ -8,6 +8,11 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  // Add this field to your User schema
+  stripeCustomerId: {
+    type: String,
+    default: null
+  },
   email: {
     type: String,
     required: true,
@@ -92,7 +97,7 @@ const User = mongoose.model('User', UserSchema);
       // Ignore errors if index doesn't exist
       console.log('No existing phoneNumber index found or already dropped');
     });
-    
+
     // Create a proper sparse index
     await User.collection.createIndex(
       { phoneNumber: 1 },

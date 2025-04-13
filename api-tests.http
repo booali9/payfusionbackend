@@ -1,0 +1,26 @@
+@baseUrl = http://localhost:5000
+@token = your_jwt_token_here
+
+### Health Check
+GET {{baseUrl}}/api/health
+
+### Add Payment Method
+POST {{baseUrl}}/api/wallet/payment-methods
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "type": "CARD",
+  "details": {
+    "cardholderName": "John Smith",
+    "cardNumber": "4111111111111111",
+    "expiryMonth": "12",
+    "expiryYear": "2028",
+    "last4": "1111",
+    "brand": "Visa"
+  }
+}
+
+### Get Payment Methods
+GET {{baseUrl}}/api/wallet/payment-methods
+Authorization: Bearer {{token}}

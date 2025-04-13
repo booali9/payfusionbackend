@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 
 const TransactionSchema = new mongoose.Schema({
@@ -8,7 +9,7 @@ const TransactionSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['DEPOSIT', 'WITHDRAWAL', 'TRANSFER', 'PAYMENT'],
+    enum: ['DEPOSIT', 'WITHDRAW', 'TRANSFER', 'PAYMENT'],
     required: true
   },
   amount: {
@@ -17,25 +18,25 @@ const TransactionSchema = new mongoose.Schema({
   },
   currency: {
     type: String,
-    default: 'USD'
-  },
-  description: {
-    type: String
+    default: 'USD',
+    enum: ['USD', 'EUR', 'GBP']
   },
   status: {
     type: String,
     enum: ['PENDING', 'COMPLETED', 'FAILED', 'CANCELLED'],
     default: 'PENDING'
   },
-  reference: {
-    type: String
+  paymentMethodId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'PaymentMethod'
   },
-  recipientInfo: {
-    type: Object
+  destinationId: String,
+  description: String,
+  metadata: {
+    type: Map,
+    of: String
   },
-  deviceId: {
-    type: String
-  }
+  reference: String
 }, { timestamps: true });
 
 module.exports = mongoose.model('Transaction', TransactionSchema);
