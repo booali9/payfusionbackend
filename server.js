@@ -49,7 +49,6 @@ app.use('/api/kyc', require('./src/routes/kyc.routes'));
 app.use('/api/transactions', require('./src/routes/transaction.routes'));
 app.use('/api/wallet', require('./src/routes/wallet.routes'));
 app.use('/uploads', express.static('uploads'));
-
 app.use(errorHandler);
 
 // For local development

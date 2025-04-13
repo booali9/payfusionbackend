@@ -1,6 +1,6 @@
 const express = require('express');
 const { authenticate } = require('../middleware/auth.middleware');
-
+const { addPaymentMethod, getPaymentMethods, deletePaymentMethod, setDefaultPaymentMethod } = require('../controllers/wallet.controller');
 const router = express.Router();
 
 // Use authentication middleware for all wallet routes
@@ -41,5 +41,10 @@ router.get('/transactions', (req, res) => {
     transactions: []
   });
 });
+
+router.post('/payment-methods', addPaymentMethod);
+router.get('/payment-methods', getPaymentMethods);
+router.delete('/payment-methods/:id', deletePaymentMethod);
+router.patch('/payment-methods/:id/set-default', setDefaultPaymentMethod);
 
 module.exports = router;
