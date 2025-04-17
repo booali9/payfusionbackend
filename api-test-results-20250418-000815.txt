@@ -1,0 +1,260 @@
+  console.log
+    Setting up Jest environment
+
+      at Object.log (jest.setup.js:2:9)
+
+PASS src/__tests__/auth.test.js (24.235 s)
+  Authentication API Tests
+    ΓêÜ GET /api/health should return 200 (131 ms)
+    ΓêÜ POST /api/auth/register endpoint exists (10014 ms)
+    ΓêÜ POST /api/auth/login endpoint exists (10020 ms)
+    ΓêÜ GET /api/users/profile requires authentication (152 ms)
+
+  console.log
+    Setting up Jest environment
+
+      at Object.log (jest.setup.js:2:9)
+
+PASS dist/src/__tests__/auth.test.js (21.91 s)
+  Authentication API Tests
+    ΓêÜ GET /api/health should return 200 (66 ms)
+    ΓêÜ POST /api/auth/register endpoint exists (10015 ms)
+    ΓêÜ POST /api/auth/login endpoint exists (10021 ms)
+    ΓêÜ GET /api/users/profile requires authentication (57 ms)
+
+  console.log
+    Setting up Jest environment
+
+      at Object.log (jest.setup.js:2:9)
+
+PASS src/__tests__/virtualCard.controller.test.js
+  Virtual Card Controller Tests
+    ΓêÜ should return 401 if no token provided (38 ms)
+    ΓêÜ should create a virtual card with valid token (61 ms)
+
+  console.log
+    Setting up Jest environment
+
+      at Object.log (jest.setup.js:2:9)
+
+PASS src/__tests__/investment.controller.test.js
+  Investment Controller Tests
+    ΓêÜ should return 401 if no token provided (47 ms)
+    ΓêÜ should check investment eligibility with valid token (33 ms)
+
+  console.log
+    Setting up Jest environment
+
+      at Object.log (jest.setup.js:2:9)
+
+PASS src/__tests__/moneyReceive.controller.test.js
+  Money Receive Controller Tests
+    ΓêÜ should return 401 if no token provided (40 ms)
+    ΓêÜ should create a money receive request (67 ms)
+
+  console.log
+    Setting up Jest environment
+
+      at Object.log (jest.setup.js:2:9)
+
+PASS src/__tests__/api.test.js
+  API Endpoints
+    ΓêÜ GET /api/health should return 200 (69 ms)
+    ΓêÜ GET /api/users/profile with auth should return 401 without token (58 ms)
+
+  console.log
+    Setting up Jest environment
+
+      at Object.log (jest.setup.js:2:9)
+
+PASS dist/src/__tests__/api.test.js
+  API Endpoints
+    ΓêÜ GET /api/health should return 200 (26 ms)
+    ΓêÜ GET /api/users/profile with auth should return 401 without token (26 ms)
+
+  console.log
+    Setting up Jest environment
+
+      at Object.log (jest.setup.js:2:9)
+
+PASS dist/src/__tests__/example.test.js
+  ΓêÜ hello world (2 ms)
+  Example test suite
+    ΓêÜ should return true for valid input (1 ms)
+    ΓêÜ should return false for invalid input (5 ms)
+
+  console.log
+    Setting up Jest environment
+
+      at Object.log (jest.setup.js:2:9)
+
+PASS src/__tests__/example.test.js
+  ΓêÜ hello world (2 ms)
+  Example test suite
+    ΓêÜ should return true for valid input (2 ms)
+    ΓêÜ should return false for invalid input (1 ms)
+
+-----------------------------|---------|----------|---------|---------|------------------------------------------------------------------------------------------
+File                         | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                                                        
+-----------------------------|---------|----------|---------|---------|------------------------------------------------------------------------------------------
+All files                    |    34.2 |    14.87 |   16.09 |   34.28 |                                                                                          
+ config                      |   22.72 |        0 |       0 |   22.72 |                                                                                          
+  db.js                      |   20.93 |        0 |       0 |   20.93 | 10-57,63-70,76-77,81-82,87-89                                                            
+  index.js                   |     100 |      100 |     100 |     100 |                                                                                          
+ controllers                 |   23.74 |    13.55 |   13.15 |    23.9 |                                                                                          
+  auth.controller.js         |   18.54 |     5.88 |   18.18 |   18.66 | 13-34,39-112,118-141,147-191,197-242,250-275,281-314,326-345,355-356,364,387-422,439-488 
+  investment.controller.js   |      92 |     64.7 |     100 |      92 | 15,54                                                                                    
+  kyc.controller.js          |   14.63 |        0 |       0 |   14.63 | 6-75,80-101,105-123                                                                      
+  moneyReceive.controller.js |   36.36 |       30 |      50 |   36.36 | 12,47-97                                                                                 
+  transaction.controller.js  |    12.9 |        0 |       0 |   13.79 | 4-30,35-61,66-87                                                                         
+  user.controller.js         |   17.39 |        0 |       0 |   17.39 | 4-29,34-61,66-85                                                                         
+  virtualCard.controller.js  |   51.72 |    36.36 |      25 |   51.72 | 13,19,44-51,67-79                                                                        
+  wallet.controller.js       |   13.49 |        0 |       0 |   13.49 | 10-33,39-85,91-144,150-184,190-217,223-232,238-259,265-294,300-342,348-371,377-411       
+ middleware                  |   63.15 |    43.75 |   33.33 |   63.15 |                                                                                          
+  auth.middleware.js         |   73.91 |    58.33 |   66.66 |   73.91 | 25,34-40,45-51                                                                           
+  upload.middleware.js       |   46.66 |        0 |       0 |   46.66 | 7-16,24-27                                                                               
+ models                      |      74 |        0 |   28.57 |      74 |                                                                                          
+  Device.js                  |     100 |      100 |     100 |     100 |                                                                                          
+  InvestmentEligibility.js   |       0 |      100 |     100 |       0 | 1-39                                                                                     
+  KYC.js                     |     100 |      100 |     100 |     100 |                                                                                          
+  OTP.js                     |     100 |      100 |     100 |     100 |                                                                                          
+  PaymentMethod.js           |     100 |      100 |     100 |     100 |                                                                                          
+  Transaction.js             |     100 |      100 |     100 |     100 |                                                                                          
+  User.js                    |   61.53 |        0 |   28.57 |   61.53 | 34-42,68-74,78,82,106                                                                    
+  VirtualCard.js             |     100 |      100 |     100 |     100 |                                                                                          
+  Wallet.js                  |     100 |      100 |     100 |     100 |                                                                                          
+ routes                      |     100 |      100 |     100 |     100 |                                                                                          
+  auth.routes.js             |     100 |      100 |     100 |     100 |                                                                                          
+  investment.routes.js       |     100 |      100 |     100 |     100 |                                                                                          
+  kyc.routes.js              |     100 |      100 |     100 |     100 |                                                                                          
+  moneyReceive.routes.js     |     100 |      100 |     100 |     100 |                                                                                          
+  transaction.routes.js      |     100 |      100 |     100 |     100 |                                                                                          
+  user.routes.js             |     100 |      100 |     100 |     100 |                                                                                          
+  virtualCard.routes.js      |     100 |      100 |     100 |     100 |                                                                                          
+  wallet.routes.js           |     100 |      100 |     100 |     100 |                                                                                          
+ services                    |   15.51 |     5.97 |    7.69 |   15.51 |                                                                                          
+  email.service.js           |   21.05 |     12.5 |      20 |   21.05 | 18-87                                                                                    
+  kyc.service.js             |   13.63 |        0 |       0 |   13.63 | 9-94                                                                                     
+  otp.service.js             |    12.9 |        0 |       0 |    12.9 | 8-92                                                                                     
+  sms.service.js             |      20 |       30 |      20 |      20 | 13-66                                                                                    
+  stripe.service.js          |   10.34 |        0 |       0 |   10.34 | 6-92                                                                                     
+  virtualCard.service.js     |   19.23 |        0 |       0 |   19.23 | 8-60                                                                                     
+ utils                       |   32.35 |    61.53 |      60 |   31.25 |                                                                                          
+  errorHandler.js            |      50 |    61.53 |      60 |      50 | 3-6,15-16,20-21,25-26                                                                    
+  validators.js              |       0 |      100 |     100 |       0 | 1-119                                                                                    
+-----------------------------|---------|----------|---------|---------|------------------------------------------------------------------------------------------
+Test Suites: 9 passed, 9 total
+Tests:       24 passed, 24 total
+Snapshots:   0 total
+Time:        56.19 s
+Ran all test suites.
+
+Jest has detected the following 6 open handles potentially keeping Jest from exiting:
+
+  ΓùÅ  TCPSERVERWRAP
+
+      123 |   test('POST /api/auth/register endpoint exists', async () => {
+      124 |     const registerPromise = request(app)
+    > 125 |       .post('/api/auth/register')
+          |        ^
+      126 |       .send({
+      127 |         fullName: 'Test User',
+      128 |         email: 'test@example.com',
+
+      at Test.serverAddress (node_modules/supertest/lib/test.js:63:35)
+      at new Test (node_modules/supertest/lib/test.js:49:14)
+      at Object.obj.<computed> [as post] (node_modules/supertest/index.js:39:18)
+      at Object.post (dist/src/__tests__/auth.test.js:125:8)
+
+
+  ΓùÅ  TCPSERVERWRAP
+
+      150 |   test('POST /api/auth/login endpoint exists', async () => {
+      151 |     const loginPromise = request(app)
+    > 152 |       .post('/api/auth/login')
+          |        ^
+      153 |       .send({
+      154 |         email: 'nonexistent@example.com',
+      155 |         password: 'wrongpassword'
+
+      at Test.serverAddress (node_modules/supertest/lib/test.js:63:35)
+      at new Test (node_modules/supertest/lib/test.js:49:14)
+      at Object.obj.<computed> [as post] (node_modules/supertest/index.js:39:18)
+      at Object.post (dist/src/__tests__/auth.test.js:152:8)
+
+
+  ΓùÅ  Timeout
+
+      94 |   try {
+      95 |     // Drop the problematic index if it exists
+    > 96 |     await User.collection.dropIndex('phoneNumber_1').catch(() => {
+         |                           ^
+      97 |       // Ignore errors if index doesn't exist
+      98 |       console.log('No existing phoneNumber index found or already dropped');
+      99 |     });
+
+      at NativeCollection.<computed> [as dropIndex] (node_modules/mongoose/lib/drivers/node-mongodb-native/collection.js:180:17)
+      at dropIndex (src/models/User.js:96:27)
+      at Object.<anonymous> (src/models/User.js:110:2)
+      at Object.require (src/controllers/auth.controller.js:3:14)
+      at Object.require (src/routes/auth.routes.js:13:5)
+      at Object.require (server.js:46:22)
+      at Object.require (src/__tests__/virtualCard.controller.test.js:2:13)
+
+
+  ΓùÅ  Timeout
+
+      94 |   try {
+      95 |     // Drop the problematic index if it exists
+    > 96 |     await User.collection.dropIndex('phoneNumber_1').catch(() => {
+         |                           ^
+      97 |       // Ignore errors if index doesn't exist
+      98 |       console.log('No existing phoneNumber index found or already dropped');
+      99 |     });
+
+      at NativeCollection.<computed> [as dropIndex] (node_modules/mongoose/lib/drivers/node-mongodb-native/collection.js:180:17)
+      at dropIndex (src/models/User.js:96:27)
+      at Object.<anonymous> (src/models/User.js:110:2)
+      at Object.require (src/controllers/auth.controller.js:3:14)
+      at Object.require (src/routes/auth.routes.js:13:5)
+      at Object.require (server.js:46:22)
+      at Object.require (src/__tests__/investment.controller.test.js:2:13)
+
+
+  ΓùÅ  Timeout
+
+      94 |   try {
+      95 |     // Drop the problematic index if it exists
+    > 96 |     await User.collection.dropIndex('phoneNumber_1').catch(() => {
+         |                           ^
+      97 |       // Ignore errors if index doesn't exist
+      98 |       console.log('No existing phoneNumber index found or already dropped');
+      99 |     });
+
+      at NativeCollection.<computed> [as dropIndex] (node_modules/mongoose/lib/drivers/node-mongodb-native/collection.js:180:17)
+      at dropIndex (src/models/User.js:96:27)
+      at Object.<anonymous> (src/models/User.js:110:2)
+      at Object.require (src/controllers/auth.controller.js:3:14)
+      at Object.require (src/routes/auth.routes.js:13:5)
+      at Object.require (server.js:46:22)
+      at Object.require (src/__tests__/moneyReceive.controller.test.js:2:13)
+
+
+  ΓùÅ  Timeout
+
+      94 |   try {
+      95 |     // Drop the problematic index if it exists
+    > 96 |     await User.collection.dropIndex('phoneNumber_1').catch(() => {
+         |                           ^
+      97 |       // Ignore errors if index doesn't exist
+      98 |       console.log('No existing phoneNumber index found or already dropped');
+      99 |     });
+
+      at NativeCollection.<computed> [as dropIndex] (node_modules/mongoose/lib/drivers/node-mongodb-native/collection.js:180:17)
+      at dropIndex (src/models/User.js:96:27)
+      at Object.<anonymous> (src/models/User.js:110:2)
+      at Object.require (src/controllers/auth.controller.js:3:14)
+      at Object.require (src/routes/auth.routes.js:13:5)
+      at Object.require (server.js:46:22)
+      at Object.require (src/__tests__/api.test.js:2:13)
+

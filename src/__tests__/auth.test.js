@@ -76,7 +76,7 @@ const http = require('http');
 let server;
 
 // Increase Jest timeout for all tests in this file
-jest.setTimeout(60000);
+// jest.setTimeout(60000);
 
 // Setup and teardown
 beforeAll(() => {
@@ -94,8 +94,7 @@ afterAll((done) => {
   if (server) {
     server.close(() => {
       // Force cleanup of any remaining handles
-      process.removeAllListeners();
-      done();
+      setTimeout(done, 500);
     });
   } else {
     done();

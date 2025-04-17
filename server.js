@@ -48,6 +48,11 @@ app.use('/api/users', require('./src/routes/user.routes'));
 app.use('/api/kyc', require('./src/routes/kyc.routes'));
 app.use('/api/transactions', require('./src/routes/transaction.routes'));
 app.use('/api/wallet', require('./src/routes/wallet.routes'));
+// Add new routes
+app.use('/api/investment', require('./src/routes/investment.routes'));
+app.use('/api/virtual-cards', require('./src/routes/virtualCard.routes'));
+app.use('/api/receive-money', require('./src/routes/moneyReceive.routes'));
+
 app.use('/uploads', express.static('uploads'));
 app.use(errorHandler);
 
